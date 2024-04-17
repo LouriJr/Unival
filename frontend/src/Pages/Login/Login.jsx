@@ -4,6 +4,7 @@ import AuthService from '../../Services/AuthService';
 import { useNavigate } from "react-router-dom";
 import ToastService from '../../Services/ToastService';
 import ModalCadastroUsuario from '../../Components/ModalCadastroUsuario/ModalCadastroUsuario';
+import CardUsuario from '../../Components/CardUsuario/CardUsuario';
 
 export default function Login() {
 
@@ -12,16 +13,18 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [modalAberto, setModalAberto] = useState(false);
+    const [usuarios, setUsuarios] = useState([]);
 
     useEffect(() => {
         VerificarLogin();
     }, []);
 
-    function VerificarLogin() {
+    async function VerificarLogin() {
         const usuarioEstaLogado = AuthService.VerificarSeUsuarioEstaLogado();
         if (usuarioEstaLogado) {
             navigate("/");
         }
+        await ListaUsuarios();
     }
 
     function AbrirModal() {
@@ -53,11 +56,23 @@ export default function Login() {
         }
     }
 
+    async function ListaUsuarios() {
+        try {
+            const response = await ApiService.get("/Usuarios");
+            const json = response.data;
+            setUsuarios(json);
+        } catch (error) {
+
+            ToastService.Error("Houve um erro no servidor ao listar usuários\r\nTente novamente mais tarde.");
+        }
+    }
+
     return (
         <div>
             <ModalCadastroUsuario
                 modalAberto={modalAberto}
                 setModalAberto={setModalAberto}
+                buscarUsuarios={ListaUsuarios}
             />
             <div>
                 <span>Login</span>
@@ -77,7 +92,13 @@ export default function Login() {
             <div>
                 <button onClick={AbrirModal}>Novo por aqui? Cadastre-se</button>
             </div>
-
+            <div>
+                {
+                    usuarios.map(usuario => (
+                        <CardUsuario usuario={usuario}></CardUsuario>
+                    ))
+                }
+            </div>
         </div>
     )
 }

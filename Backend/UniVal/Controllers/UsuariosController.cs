@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using UniVal.Azure;
 using UniVal.DAOs;
 using UniVal.DTOs;
 
@@ -28,6 +29,9 @@ namespace UniVal.Controllers
                 return Conflict(mensagem);
             }
 
+            var azureBlobStorage = new AzureBlobStorage();
+            usuario.ImagemURL = azureBlobStorage.UploadImage(usuario.Base64);
+
             dao.Cadastrar(usuario);
             return Ok();
         }
@@ -46,6 +50,15 @@ namespace UniVal.Controllers
             var token = GenerateJwtToken(usuarioLogado);
 
             return Ok(new { token });
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var dao = new UsuariosDAO();
+            var usuarios = dao.Listar();
+
+            return Ok(usuarios);
         }
 
 

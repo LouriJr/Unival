@@ -10,12 +10,13 @@ namespace UniVal.DAOs
             var conexao = ConnectionFactory.Build();
             conexao.Open();
 
-            var query = @"INSERT INTO Usuarios (Email, Senha) VALUES
-						(@email,@senha)";
+            var query = @"INSERT INTO Usuarios (Email, Senha, ImagemUrl) VALUES
+						(@email,@senha, @url)";
 
             var comando = new MySqlCommand(query, conexao);
             comando.Parameters.AddWithValue("@email", usuario.Email);
             comando.Parameters.AddWithValue("@senha", usuario.Senha);
+            comando.Parameters.AddWithValue("@url", usuario.ImagemURL);
 
             comando.ExecuteNonQuery();
             conexao.Close();
@@ -73,6 +74,34 @@ namespace UniVal.DAOs
             conexao.Close();
 
             return usuario;
+        }
+
+        internal List<UsuarioDTO> Listar()
+        {
+            var conexao = ConnectionFactory.Build();
+            conexao.Open();
+
+            var query = "SELECT * FROM Usuarios";
+
+            var comando = new MySqlCommand(query, conexao);
+
+            var dataReader = comando.ExecuteReader();
+
+            var usuarios = new List<UsuarioDTO>();
+
+            while (dataReader.Read())
+            {
+                var usuario = new UsuarioDTO();
+                usuario.ID = int.Parse(dataReader["ID"].ToString());
+                usuario.Email = dataReader["Email"].ToString();
+                usuario.Senha = dataReader["Senha"].ToString();
+                usuario.ImagemURL = dataReader["ImagemURL"].ToString();
+
+                usuarios.Add(usuario);
+            }
+            conexao.Close();
+
+            return usuarios;
         }
     }
 }
