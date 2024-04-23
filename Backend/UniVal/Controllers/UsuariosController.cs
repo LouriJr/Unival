@@ -29,8 +29,11 @@ namespace UniVal.Controllers
                 return Conflict(mensagem);
             }
 
-            var azureBlobStorage = new AzureBlobStorage();
-            usuario.ImagemURL = azureBlobStorage.UploadImage(usuario.Base64);
+            if (usuario.Base64 is not null)
+            {
+                var azureBlobStorage = new AzureBlobStorage();
+                usuario.ImagemURL = azureBlobStorage.UploadImage(usuario.Base64);
+            }
 
             dao.Cadastrar(usuario);
             return Ok();
